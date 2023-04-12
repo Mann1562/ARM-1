@@ -1,41 +1,29 @@
-        .data
-input1: .word   0          @ reserve space for first input
-input2: .word   0          @ reserve space for second input
-msg1:   .asciz  "Enter first number: "    @ message for first input
-msg2:   .asciz  "Enter second number: "   @ message for second input
-msg3:   .asciz  "The larger number is: "  @ message for output
-        .text
-        .global main
-main:
-        @ prompt for first input
-        ldr     r0, =msg1      @ load address of first message
-        bl      printf         @ print message to console
-        ldr     r0, =input1    @ load address of first input
-        bl      scanf          @ read input from console
+    .data
+    inputMsg:   .asciz "Enter an integer: "
+    outputMsg:  .asciz "You entered: %d\n"
+    .balign 4
+    input:      .skip   4   @ Reserve 4 bytes for the input
 
-        @ prompt for second input
-        ldr     r0, =msg2      @ load address of second message
-        bl      printf         @ print message to console
-        ldr     r0, =input2    @ load address of second input
-        bl      scanf          @ read input from console
+    .text
+    .global main
+    main:
+        @ Print the input prompt
+        ldr r0, =inputMsg
+        bl printf
 
-        @ compare the two inputs
-        ldr     r1, [input1]   @ load first input into r1
-        ldr     r2, [input2]   @ load second input into r2
-        cmp     r1, r2         @ compare the two inputs
-        bge     first_is_larger   @ if first input is greater than or equal to second input, branch to first_is_larger
-        ldr     r1, =msg3      @ load address of output message
-        ldr     r2, [input2]   @ load second input into r2
-        b       print_output   @ branch to print_output
+        @ Read the input as a string from stdin
+        ldr r0, =input
+        ldr r1, =4      @ Read up to 4 bytes (enough for a 32-bit integer)
+        bl fgets
 
-first_is_larger:
-        ldr     r1, =msg3      @ load address of output message
-        ldr     r2, [input1]   @ load first input into r2
+        @ Convert the input string to an integer
+        ldr r0, =input
+        bl atoi
 
-print_output:
-        bl      printf         @ print the output message
-        mov     r0, r2         @ move the larger input into r0
-        bl      putchar        @ print the larger input to console
+        @ Print the input integer
+        ldr r1, =outputMsg
+        mov r2, r0      @ Move the input integer to r2 for printing
+        bl printf
 
-        mov     r7, #0         @ exit the program
-        svc     0
+        mov r0, #0      @ Return 0
+        bx lr
