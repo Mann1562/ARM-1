@@ -1,47 +1,65 @@
 .global _start
-
-.section .data
-input1: .byte 0
-input2: .byte 0
-output: .ascii "The larger is %d\n"
-
-.section .text
 _start:
-    // read input1
-    mov x0, #0
-    mov x1, #0
-    adr x2, input1
-    mov w3, #2
+
+    // Set up input prompts
+    adr x0, input1
+    mov x2, #3
+    mov x8, #0
     svc #0
 
-    // load input1 into w0
-    ldr w0, [input1]
-
-    // read input2
-    mov x0, #0
-    mov x1, #0
-    adr x2, input2
-    mov w3, #2
+    // Read in first input
+    adr x0, input1
+    mov x1, sp
+    mov x2, #2
+    mov x8, #0
     svc #0
 
-    // load input2 into w1
-    ldr w1, [input2]
+    // Convert first input to integer
+    ldrb w0, [sp]
+    sub w0, w0, #'0'
+    msub w0, w0, w0, #10
 
-    // compare inputs and store the larger value in w0
+    // Read in second input
+    adr x0, input2
+    add x1, sp, #1
+    mov x2, #2
+    mov x8, #0
+    svc #0
+
+    // Convert second input to integer
+    ldrb w1, [sp, #1]
+    sub w1, w1, #'0'
+    msub w1, w1, w1, #10
+
+    // Compare integers and store the larger one
     cmp w0, w1
-    bge input1_is_larger
+    b.gt first
     mov w0, w1
-    b output_result
 
-input1_is_larger:
-    // output result
-output_result:
+first:
+    // Convert integer to string and print
+    add w0, w0, #'0'
+    strb w0, [sp, #3]
+    mov x0, #1
     adr x1, output
-    mov w2, w0
-    mov w3, #1
+    mov x2, #2
+    mov x8, #0
     svc #0
 
-    // exit program
+    // Print newline character
+    adr x0, newline
+    mov x1, sp
+    mov x2, #1
+    mov x8, #0
+    svc #0
+
+    // Terminate program
     mov x0, #0
     mov x8, #93
     svc #0
+
+.data
+input1: .ascii "Enter integer 1: "
+input2: .ascii "Enter integer 2: "
+output: .ascii "The larger is "
+newline: .ascii "\n"
