@@ -1,94 +1,62 @@
-@ This program reads two two-digit non-negative integers from standard input
-@ and prints the larger of the two to standard output.
+.data
+input1: .byte 0
+input2: .byte 0
+newline: .asciz "\n"
+message1: .asciz "Enter integer 1: "
+message2: .asciz "Enter integer 2: "
+message3: .asciz "The larger is "
 
-    .global main
-    .extern printf
-    .extern scanf
-
-    .section .data
-format_in:
-    .string "%d"
-format_out:
-    .string "The larger is %d\n"
-input1:
-    .skip 4
-input2:
-    .skip 4
-
-    .section .text
+.text
+.global main
 main:
-    @ Prompt the user for input 1
-    adr x0, format_in
-    bl scanf
-    mov w1, 0
-    ldrb w0, [input1]
-    cmp w0, #'0'
-    b.lo input1_error
-    cmp w0, #'9'
-    b.hi input1_error
-    sub w0, w0, #'0'
-    mul w1, w1, 10
-    add w1, w1, w0
-
-    @ Prompt the user for input 2
-    adr x0, format_in
-    bl scanf
-    mov w2, 0
-    ldrb w0, [input2]
-    cmp w0, #'0'
-    b.lo input2_error
-    cmp w0, #'9'
-    b.hi input2_error
-    sub w0, w0, #'0'
-    mul w2, w2, 10
-    add w2, w2, w0
-
-    @ Compare the two inputs and print the larger
-    cmp w1, w2
-    b.gt print1
-    b.lt print2
-    b print1
-
-input1_error:
-    @ Error if input1 is not a two-digit non-negative integer
-    adr x0, format_out
-    mov w1, 0
-    mov w0, 0
-    bl printf
-    b exit
-
-input2_error:
-    @ Error if input2 is not a two-digit non-negative integer
-    adr x0, format_out
-    mov w1, 0
-    mov w0, 0
-    bl printf
-    b exit
-
-print1:
-    @ Print the value of input1 since it is larger
-    adr x0, format_out
-    mov w1, 0
-    mov w0, w1
-    ldrb w1, [input1]
-    sub w1, w1, #'0'
-    mul w0, w0, 10
-    add w0, w0, w1
-    bl printf
-    b exit
-
-print2:
-    @ Print the value of input2 since it is larger
-    adr x0, format_out
-    mov w1, 0
-    mov w0, w2
-    ldrb w1, [input2]
-    sub w1, w1, #'0'
-    mul w0, w0, 10
-    add w0, w0, w1
-    bl printf
-
-exit:
-    @ Exit the program
-    mov w0, 0
-    ret
+  // prompt for integer 1
+  mov x0, #0 // stdout
+  adr x1, message1 // message
+  mov x2, #16 // message length
+  bl printf
+  
+  // read integer 1
+  adr x0, input1
+  mov x1, #2 // buffer length
+  bl fgets
+  ldrb w0, [input1] // load the first byte of the buffer as an unsigned byte
+  sub w0, w0, #'0' // convert from ASCII to integer
+  msub w0, w0, w0, #10 // multiply by 10
+  ldrb w1, [input1, #1]
+  sub w1, w1, #'0'
+  add w0, w0, w1
+  
+  // prompt for integer 2
+  mov x0, #0 // stdout
+  adr x1, message2 // message
+  mov x2, #16 // message length
+  bl printf
+  
+  // read integer 2
+  adr x0, input2
+  mov x1, #2 // buffer length
+  bl fgets
+  ldrb w1, [input2]
+  sub w1, w1, #'0'
+  msub w1, w1, w1, #10
+  ldrb w2, [input2, #1]
+  sub w2, w2, #'0'
+  add w1, w1, w2
+  
+  // compare integers and print the larger
+  cmp w0, w1
+  bge larger1
+  mov w0, w1
+  larger1:
+  mov x1, #0 // stdout
+  adr x0, message3 // message
+  mov x2, #12 // message length
+  bl printf
+  mov x1, x0 // stdout
+  mov w2, #0 // format string
+  mov w3, #0 // integer to print
+  mov w3, w0 // set integer to print to larger of the two input values
+  adr x0, newline // newline
+  bl printf
+  mov w0, #0 // exit
+  ret
