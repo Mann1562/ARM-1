@@ -1,108 +1,48 @@
+
+
+.data
+input1:  .asciz "Enter the first number: "
+input2:  .asciz "Enter the second number: "
+output:  .asciz "The larger number is: %d\n"
+scan:    .asciz "%d"
+larger:  .word 0
+
+.text
 .global main
-
-.equ STDIN_FILENO, 0
-.equ STDOUT_FILENO, 1
-
-.section .data
-    input1: .ascii "Enter integer 1: "
-    input2: .ascii "Enter integer 2: "
-    output: .ascii "The larger is "
-
-.section .text
 main:
-    // Allocate space on the stack for local variables
-    sub sp, sp, #16
-
-    // Prompt the user for input 1
-    mov x0, #STDOUT_FILENO
-    ldr x1, =input1
-    mov x2, #13
-    bl write
-
-    // Read input 1 from user
-    mov x0, #STDIN_FILENO
-    ldr x1, =sp
-    mov x2, #2
-    bl read
-
-    // Convert input 1 from ASCII to integer
-    ldrb w0, [sp]
-    sub w0, w0, #48
-
-    ldrb w1, [sp, #1]
-    sub w1, w1, #48
-    mov w2, #10
-    mul w1, w1, w2
-    add w0, w0, w1
-
-    // Prompt the user for input 2
-    mov x0, #STDOUT_FILENO
-    ldr x1, =input2
-    mov x2, #13
-    bl write
-
-    // Read input 2 from user
-    mov x0, #STDIN_FILENO
-    ldr x1, =sp
-    mov x2, #2
-    bl read
-
-    // Convert input 2 from ASCII to integer
-    ldrb w1, [sp]
-    sub w1, w1, #48
-
-    ldrb w2, [sp, #1]
-    sub w2, w2, #48
-    mov w3, #10
-    mul w2, w2, w3
-    add w1, w1, w2
-
-    // Compare input 1 and input 2
+    // prompt for first input
+    adr x0, input1
+    bl printf
+    // read first input
+    adrp x0, larger
+    add x0, x0, #:lo12:larger
+    adrp x1, scan
+    add x1, x1, #:lo12:scan
+    bl scanf
+    // prompt for second input
+    adr x0, input2
+    bl printf
+    // read second input
+    adrp x0, larger
+    add x0, x0, #:lo12:larger
+    adrp x1, scan
+    add x1, x1, #:lo12:scan
+    bl scanf
+    // compare inputs and store larger in memory
+    ldr w0, [larger]
+    ldr w1, [larger, #4]
     cmp w0, w1
-    bge print_input1
-
-    // If input 1 is less than input 2, print input 2
-    mov w0, #STDOUT_FILENO
-    ldr x1, =output
-    mov x2, #12
-    bl write
-
-    mov w0, w1
-    bl print_integer
-    b exit_program
-
-print_input1:
-    // If input 1 is greater than or equal to input 2, print input 1
-    mov w0, #STDOUT_FILENO
-    ldr x1, =output
-    mov x2, #12
-    bl write
-
-    mov w0, w0
-    bl print_integer
-
-exit_program:
-    // Clean up the stack and exit the program
-    add sp, sp, #16
+    b.gt first_larger
+    str w1, [larger]
+    b done
+first_larger:
+    str w0, [larger]
+done:
+    // output larger number
+    adrp x0, output
+    add x0, x0, #:lo12:output
+    ldr w1, [larger]
+    bl printf
+    // exit program
     mov w0, #0
     b exit
-
-read:
-    // Wrapper function for the read system call
-    mov x3, #0
-    svc #0
-    ret
-
-write:
-    // Wrapper function for the write system call
-    mov x3, #0
-    svc #1
-    ret
-
-print_integer:
-    // Print an integer to standard output
-    sub sp, sp, #16
-
-    str w0, [sp, #12]
-    mov x0, #0
-    ldr x
