@@ -13,10 +13,7 @@ _start:
     mov x8, 0
     svc 0
 
-    mov x0, 0 // Clear x0 register
-    mov w0, #0 // Clear w0 register
-    ldp w0, w1, [x0] // Load 2 32-bit words from buffer pointed by x0
-    mov x1, w0 // Copy num1 to x1
+    ldr x1, [num1] // Load num1 into register x1
 
     // Read num2 into register x2
     adr x0, prompt
@@ -25,10 +22,7 @@ _start:
     mov x8, 0
     svc 0
 
-    mov x0, 0 // Clear x0 register
-    mov w0, #0 // Clear w0 register
-    ldp w0, w1, [x0] // Load 2 32-bit words from buffer pointed by x0
-    mov x2, w0 // Copy num2 to x2
+    ldr x2, [num2] // Load num2 into register x2
 
     // Compare num1 and num2 and print the larger value
     cmp x1, x2
