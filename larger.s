@@ -16,10 +16,9 @@ _start:
     mov x8, 0
     svc 0
 
-    // Copy num1 to x1
+    // Store num1 in buffer
     ldr x0, =buffer
-    ldp w1, w2, [x0]
-    mov x1, x1
+    str w0, [x0]
 
     // Read num2 into register x2
     adr x0, prompt
@@ -28,19 +27,21 @@ _start:
     mov x8, 0
     svc 0
 
-    // Copy num2 to x2
+    // Store num2 in buffer
     ldr x0, =buffer
-    ldp w1, w2, [x0]
-    mov x2, x1
+    str w0, [x0, 4]
 
     // Compare num1 and num2 and print the larger value
+    ldr x0, =buffer
+    ldr w1, [x0]
+    ldr w2, [x0, 4]
     cmp x1, x2
     bge print_num1
     b print_num2
 
 print_num1:
     adr x0, result
-    mov x1, x1
+    mov x1, w1
     mov x2, 0
     mov x8, 1
     svc 0
@@ -48,7 +49,7 @@ print_num1:
 
 print_num2:
     adr x0, result
-    mov x1, x2
+    mov x1, w2
     mov x2, 0
     mov x8, 1
     svc 0
