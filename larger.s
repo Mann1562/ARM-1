@@ -1,26 +1,36 @@
 .data
+result: .asciz "The larger number is: %d\n"
 prompt: .asciz "Enter a number: "
-result: .asciz "The larger number is: %d \n"
 
 .text
 .global _start
 
 _start:
-    // read num1 into register x1
+    // Read num1 into register x1
     adr x0, prompt
     mov x1, 0
     mov x2, 16
     mov x8, 0
     svc 0
 
-    // read num2 into register x2
+    mov x0, 0 // Clear x0 register
+    mov w0, #0 // Clear w0 register
+    ldp w0, w1, [x0] // Load 2 32-bit words from buffer pointed by x0
+    mov x1, w0 // Copy num1 to x1
+
+    // Read num2 into register x2
     adr x0, prompt
     mov x1, 0
     mov x2, 16
     mov x8, 0
     svc 0
 
-    // compare num1 and num2 and print the larger value
+    mov x0, 0 // Clear x0 register
+    mov w0, #0 // Clear w0 register
+    ldp w0, w1, [x0] // Load 2 32-bit words from buffer pointed by x0
+    mov x2, w0 // Copy num2 to x2
+
+    // Compare num1 and num2 and print the larger value
     cmp x1, x2
     bge print_num1
     b print_num2
@@ -42,7 +52,7 @@ print_num2:
     b exit
 
 exit:
-    // exit the program
+    // Exit the program
     mov x0, 0
     mov x8, 93
     svc 0
