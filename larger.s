@@ -2,27 +2,33 @@
 result: .asciz "The larger number is: %d\n"
 prompt: .asciz "Enter a number: "
 
+.balign 4
+buffer:
+    .skip 8
+
 .text
 .global _start
 
 _start:
-    // Read num1 into register x1
+    // Read num1 into buffer
     adr x0, prompt
     mov x1, 0
     mov x2, 16
     mov x8, 0
     svc 0
 
-    ldr x1, [num1] // Load num1 into register x1
+    // Load num1 into x1
+    ldp x1, x2, [buffer]
 
-    // Read num2 into register x2
+    // Read num2 into buffer
     adr x0, prompt
     mov x1, 0
     mov x2, 16
     mov x8, 0
     svc 0
 
-    ldr x2, [num2] // Load num2 into register x2
+    // Load num2 into x2
+    ldp x2, x3, [buffer]
 
     // Compare num1 and num2 and print the larger value
     cmp x1, x2
