@@ -1,31 +1,27 @@
-    .data
-    inputMsg:   .asciz "Enter a 64-bit integer: "
-    outputMsg:  .asciz "You entered: %ld\n"
-    .balign 8
-    input:      .xword  0   @ Reserve 8 bytes for the input
+.data
+num1: .word 0
+num2: .word 0
+prompt: .asciz "Enter a number: "
+result: .asciz "The larger number is: %d \n"
 
-    .text
-    .global main
-    main:
-        @ Print the input prompt
-        adr x0, inputMsg
-        bl printf
+.text
+.global _start
 
-        @ Read the input integer from stdin
-        adr x0, input
-        mov x1, #20     @ Read up to 20 bytes (enough for a 64-bit integer)
-        mov x2, #0      @ Set the file descriptor for stdin
-        mov x8, #0      @ Set the read system call number
-        svc #0
+_start:
+adr x0, prompt
+mov x1, 0
+mov x2, 16
+mov x8, 0
+svc 0
 
-        @ Convert the input string to an integer
-        ldr x0, =input
-        ldr x0, [x0]
+str x0, [num1]
 
-        @ Print the input integer
-        adr x1, outputMsg
-        mov x2, x0      @ Move the input integer to x2 for printing
-        bl printf
+adr x0, prompt
+mov x1, x0
+mov x2, 16
+mov x8, 0
+svc 0
 
-        mov w0, #0      @ Return 0
-        ret
+str x0, [num2]
+
+
