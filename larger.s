@@ -19,7 +19,7 @@ _start:
     // Copy num1 to x1
     ldr x0, =buffer
     ldp w1, w2, [x0]
-    mov x1, w1
+    mov x1, x1
 
     // Read num2 into register x2
     adr x0, prompt
@@ -31,7 +31,7 @@ _start:
     // Copy num2 to x2
     ldr x0, =buffer
     ldp w1, w2, [x0]
-    mov x2, w1
+    mov x2, x1
 
     // Compare num1 and num2 and print the larger value
     cmp x1, x2
