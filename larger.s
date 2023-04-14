@@ -13,7 +13,7 @@ _start:
     mov x0, #1
     ldr x1, =prompt1
     mov x2, #16
-    mov #x8, #64
+    mov x8, #64
     svc 0
     
     //Read the 1st number inputted
@@ -27,7 +27,7 @@ _start:
     mov x0, #1
     ldr x1, =prompt2
     mov x2, #16
-    mov #x8, #64
+    mov x8, #64
     svc 0
     
     //Read the 2nd number inputted
@@ -52,7 +52,7 @@ _start:
     blt print_num2
 
 print_num1:
-    mov x0, $1
+    mov x0, #1
     ldr x1, =num1
     mov x2, #4
     mov x8, #64
