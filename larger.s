@@ -1,62 +1,71 @@
-.data
-result: .asciz "The larger number is: %d\n"
-prompt: .asciz "Enter a number: "
+    .section .data
+prompt1:        .ascii "Enter integer 1: \n"
+prompt2:        .ascii "Enter integer 2: \n"
+resultPrompt:   .ascii "The larger is "
+num1: .word 4
+num2: .word 4
 
-.balign 8
-buffer: .skip 16
-
-.text
-.global _start
-
+    .section .text
+    .global _start
+    
 _start:
-    // Read num1 into register x1
-    adr x0, prompt
-    mov x1, 0
-    mov x2, 16
-    mov x8, 0
+    //Print the first prompt (prompt1)
+    mov x0, #1
+    ldr x1, =prompt1
+    mov x2, #16
+    mov #x8, #64
+    svc 0
+    
+    //Read the 1st number inputted
+    mov x0, #0
+    adr x1, num1
+    mov x2, #4
+    mov x8, #63
     svc 0
 
-    // Store num1 in buffer
-    ldr x0, =buffer
-    str w0, [x0]
-
-    // Read num2 into register x2
-    adr x0, prompt
-    mov x1, 0
-    mov x2, 16
-    mov x8, 0
+    //Print the second prompt (prompt2)
+    mov x0, #1
+    ldr x1, =prompt2
+    mov x2, #16
+    mov #x8, #64
     svc 0
-
-    // Store num2 in buffer
-    ldr x0, =buffer
-    str w0, [x0, 4]
+    
+    //Read the 2nd number inputted
+    mov x0, #0
+    adr x1, num2
+    mov x2, #4
+    mov x8, #63
+    svc 0
+    
+    //Print the result line
+    mov x0, #1
+    ldr x1, =resultPrompt
+    mov x2, #14
+    mov x8, #64
+    svc 0
 
     // Compare num1 and num2 and print the larger value
-    ldr x0, =buffer
-    ldr w1, [x0]
-    ldr w2, [x0, 4]
-    cmp x1, x2
-    bge print_num1
-    b print_num2
+    ldr x3, =num1
+    ldr w4, [x3]
+    ldr w6, [x5]
+    cmp w4, w6
+    blt print_num2
 
 print_num1:
-    adr x0, result
-    mov x1, w1
-    mov x2, 0
-    mov x8, 1
+    mov x0, $1
+    ldr x1, =num1
+    mov x2, #4
+    mov x8, #64
     svc 0
     b exit
 
 print_num2:
-    adr x0, result
-    mov x1, w2
-    mov x2, 0
-    mov x8, 1
+    mov x0, #1
+    ldr x1, =num2
+    mov x2, #4
+    mov x8, #64
     svc 0
-    b exit
 
 exit:
-    // Exit the program
-    mov x0, 0
-    mov x8, 93
+    mov x8, #93
     svc 0
