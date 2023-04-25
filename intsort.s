@@ -45,26 +45,6 @@ generate_loop:
 
 generate_exit:
 
-// Print the array
-    mov x3, ARRAY_SIZE
-print_loop:
-    cmp x3, #0
-    b.eq print_exit
-
-    sub x3, x3, #1
-    ldr x2, [x4, x3, lsl #2]
-    mov w0, 1       // stdout file descriptor
-    mov w1, #0      // no flags
-    mov w2, #10     // decimal format
-    bl printf
-    mov w0, 1       // stdout file descriptor
-    mov w1, #0      // no flags
-    mov w2, #32     // space character
-    bl putchar
-    b print_loop
-
-print_exit:
-
 // Clean up the stack and exit
     add sp, sp, #32
     mov w0, #0
