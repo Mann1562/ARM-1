@@ -1,48 +1,64 @@
-/* aarch64 assembly program to generate an array of 10 random integers
-   in the range [10..99] and print out the array to standard output */
+.global main
+.func main
 
-    .global main
-    .bss
-array:
-    .skip 40
-    .text
+// Constants
+.equ ARRAY_SIZE, 10
+.equ MIN_VALUE, 10
+.equ MAX_VALUE, 99
+
+// Allocate space for the array
+.bss
+    .lcomm arr, ARRAY_SIZE * 4
+
+.data
+fmt:    .string "%d "
+
+// Entry point
 main:
-    // seed the random number generator
-    mov x0, #0
+    // Initialize random seed
+    adr x0, . + 4
     bl srand
 
-    // fill the array with random numbers
-    mov x1, #10             // array length
-    ldr x2, =array          // load array address
-    fill_loop:
-        bl rand             // generate a random number
-        umod x3, x0, #90    // get the remainder of the division by 90
-        add x3, x3, #10     // add 10 to get a number in the range [10..99]
-        str w3, [x2], #4    // store the random number in the array
-        subs x1, x1, #1
-        bne fill_loop
-
-    // print the array to standard output
-    ldr x0, =array
-    ldr x1, =10
-    ldr x2, =format_str
-    mov w8, #0
-print_loop:
-    ldr w3, [x0], #4
+    // Generate and print the random array
+    adr x1, arr
+    mov x2, ARRAY_SIZE
+    bl generate_random_array
+    adr x0, .L1
     bl printf
-    subs x1, x1, #1
-    bne print_loop
-    b exit
 
-    // exit the program
-exit:
-    mov x0, #0
+    // Exit
+    mov x0, 0
     ret
 
-    .data
-format_str:
-    .ascii "%d "
+// Generate a random integer in the range [MIN_VALUE, MAX_VALUE]
+generate_random_integer:
+    mov x1, MAX_VALUE-MIN_VALUE+1
+    bl rand
+    madd x0, x0, x1, MIN_VALUE
+    ret
 
-    .extern printf
-    .extern srand
-    .extern rand
+// Generate an array of random integers
+generate_random_array:
+    mov x3, 0
+generate_random_array_loop:
+    bl generate_random_integer
+    str w0, [x1, x3, lsl #2]
+    add x3, x3, 1
+    cmp x3, x2
+    blt generate_random_array_loop
+    ret
+
+// Print the array
+.L1:
+    .space 20
+    adrp x0, fmt
+    add x0, x0, :lo12:fmt
+    adr x1, arr
+    mov x2, ARRAY_SIZE
+print_loop:
+    ldr w3, [x1], #4
+    bl printf
+    sub x2, x2, 1
+    cbnz x2, print_loop
+    adr lr, . + 4
+    ret
