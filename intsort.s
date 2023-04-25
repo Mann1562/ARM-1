@@ -1,64 +1,41 @@
 .global main
-.func main
+    .text
 
-// Constants
-.equ ARRAY_SIZE, 10
-.equ MIN_VALUE, 10
-.equ MAX_VALUE, 99
-
-// Allocate space for the array
-.bss
-    .lcomm arr, ARRAY_SIZE * 4
-
-.data
-fmt:    .string "%d "
-
-// Entry point
 main:
-    // Initialize random seed
-    adr x0, . + 4
+    // Initialize random number generator
+    mov x0, #0       // Use current time as seed
     bl srand
 
-    // Generate and print the random array
-    adr x1, arr
-    mov x2, ARRAY_SIZE
-    bl generate_random_array
-    adr x0, .L1
-    bl printf
+    // Allocate space for array
+    mov x1, #10      // Number of elements in array
+    lsl x1, x1, #2   // Multiply by 4 to get size in bytes
+    mov x2, #0       // Alignment
+    mov x0, #0       // Flags
+    mov x8, #215     // System call number for mmap
+    mov x16, #0      // File descriptor (not used)
+    mov x17, #0x22   // PROT_READ | PROT_WRITE | PROT_EXEC
+    mov x18, #0x22   // MAP_PRIVATE | MAP_ANONYMOUS
+    svc #0
 
-    // Exit
-    mov x0, 0
-    ret
+    // Initialize array with random numbers
+    mov x3, x0       // Base address of array
+    mov x4, #10      // Number of elements
+loop:
+    bl rand          // Generate random number
+    and x5, x0, #0x7F  // Limit to range 0-127
+    add x5, x5, #10  // Shift range to 10-137
+    str w5, [x3], #4 // Store random number in array
+    subs x4, x4, #1
+    bne loop
 
-// Generate a random integer in the range [MIN_VALUE, MAX_VALUE]
-generate_random_integer:
-    mov x1, MAX_VALUE-MIN_VALUE+1
-    bl rand
-    madd x0, x0, x1, MIN_VALUE
-    ret
+    // Print array to standard output
+    mov x0, #1       // File descriptor for stdout
+    mov x1, x3       // Base address of array
+    lsl x2, #2       // Multiply by 4 to get size in bytes
+    mov x8, #64      // System call number for write
+    svc #0
 
-// Generate an array of random integers
-generate_random_array:
-    mov x3, 0
-generate_random_array_loop:
-    bl generate_random_integer
-    str w0, [x1, x3, lsl #2]
-    add x3, x3, 1
-    cmp x3, x2
-    blt generate_random_array_loop
-    ret
-
-// Print the array
-.L1:
-    .space 20
-    adrp x0, fmt
-    add x0, x0, :lo12:fmt
-    adr x1, arr
-    mov x2, ARRAY_SIZE
-print_loop:
-    ldr w3, [x1], #4
-    bl printf
-    sub x2, x2, 1
-    cbnz x2, print_loop
-    adr lr, . + 4
-    ret
+    // Exit program
+    mov x0, #0       // Return value
+    mov x8, #93      // System call number for exit
+    svc #0
