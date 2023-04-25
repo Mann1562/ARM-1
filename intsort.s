@@ -1,107 +1,70 @@
-// Author: ChatGPT
-// Date: 2023-04-24
-// Description: This program creates an array of 10 random integers in the range [10..99],
-//              prints the array to standard output, sorts the array using the insertion sort algorithm,
-//              and prints the sorted array to standard output.
+// Set up constants
+.equ ARRAY_SIZE, 10
+.equ MIN_VALUE, 10
+.equ MAX_VALUE, 99
 
-// Define the size of the array
-#define ARRAY_SIZE 10
+// Set up registers
+// x0 is always zero
+// x1 is the stack pointer
+// x2 is used as a temporary register
+// x3 is used as a loop counter
+// x4 is used to store the array pointer
+// x5 is used to store the minimum value
+// x6 is used to store the maximum value
+// x7 is used to store the random number
+// x8 is used to store the current index
 
-// Define printf and rand functions
-.extern printf
-.extern rand
+// Set up the stack
+    mov x1, sp
+    sub sp, sp, #32
 
-// Define the main function
-.globl main
-.type main, %function
-main:
-  // Allocate space on the stack for the array
-  sub sp, sp, ARRAY_SIZE, lsl #2
+// Allocate memory for the array
+    mov x2, ARRAY_SIZE
+    lsl x2, x2, #2     // Multiply by 4 (size of int)
+    bl malloc
+    mov x4, x0         // Store the array pointer
 
-  // Seed the random number generator with the current time
-  adr lr, .Ltime
-  bl time
-  adr lr, .Lrand
-  bl rand
+// Initialize the random number generator
+    bl srand
 
-  // Initialize the array with random integers in the range [10..99]
-  adr lr, array
-  for_loop1:
-    cmp lr, array_end
-    b.ge end_for1
-    adr x0, rand
+// Generate the array
+    mov x5, MIN_VALUE
+    mov x6, MAX_VALUE
+    mov x8, #0         // Initialize the index
+generate_loop:
+    cmp x8, ARRAY_SIZE
+    b.eq generate_exit
+
     bl rand
-    mov w1, #90
-    add w0, w0, #10
-    str w0, [lr]
-    add lr, lr, #4
-    b for_loop1
-  end_for1:
+    umod x7, x0, MAX_VALUE-MIN_VALUE+1
+    add x7, x7, MIN_VALUE
+    str x7, [x4, x8, lsl #2]  // Store the random number in the array
+    add x8, x8, #1            // Increment the index
+    b generate_loop
 
-  // Print the unsorted array to standard output
-  adr lr, unsorted_string
-  adr x0, printf
-  bl printf
-  adr lr, array
-  for_loop2:
-    cmp lr, array_end
-    b.ge end_for2
-    ldr w0, [lr]
-    adr x1, format_string
+generate_exit:
+
+// Print the array
+    mov x3, ARRAY_SIZE
+print_loop:
+    cmp x3, #0
+    b.eq print_exit
+
+    sub x3, x3, #1
+    ldr x2, [x4, x3, lsl #2]
+    mov w0, 1       // stdout file descriptor
+    mov w1, #0      // no flags
+    mov w2, #10     // decimal format
     bl printf
-    add lr, lr, #4
-    b for_loop2
-  end_for2:
+    mov w0, 1       // stdout file descriptor
+    mov w1, #0      // no flags
+    mov w2, #32     // space character
+    bl putchar
+    b print_loop
 
-  // Perform insertion sort on the array
-  adr lr, array
-  add x1, xzr, #1
-  for_loop3:
-    cmp x1, #ARRAY_SIZE
-    b.ge end_for3
-    ldr w2, [lr, x1, lsl #2]
-    add x2, x1, #-1
-    for_loop4:
-      cmp x2, #-1
-      b.le end_for4
-      ldr w3, [lr, x2, lsl #2]
-      cmp w3, w2
-      b.le end_for4
-      str w3, [lr, x2, lsl #2]
-      sub x2, x2, #1
-      b for_loop4
-    end_for4:
-      str w2, [lr, x2, lsl #2]
-      add x1, x1, #1
-    b for_loop3
-  end_for3:
+print_exit:
 
-  // Print the sorted array to standard output
-  adr lr, sorted_string
-  adr x0, printf
-  bl printf
-  adr lr, array
-  for_loop5:
-    cmp lr, array_end
-    b.ge end_for5
-    ldr w0, [lr]
-    adr x1, format_string
-    bl printf
-    add lr, lr, #4
-    b for_loop5
-  end_for5:
-
-  // Free the space allocated for the array
-  add sp, sp, ARRAY_SIZE, lsl #2
-
-  // Return 0 to indicate successful program completion
-  mov x0, #0
-  ret
-
-// Define the .bss section for the array
-.section .bss
-  .align 3
-array:
-  .skip ARRAY_SIZE * 4
-array_end:
-
+// Clean up the stack and exit
+    add sp, sp, #32
+    mov w0, #0
+    ret
