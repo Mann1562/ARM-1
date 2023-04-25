@@ -1,51 +1,61 @@
-// Set up constants
-.equ ARRAY_SIZE, 10
-.equ MIN_VALUE, 10
-.equ MAX_VALUE, 99
+/* aarch64 assembly language program to create an array of 10 random integers in the range [10..99] */
 
-// Set up registers
-// x0 is always zero
-// x1 is the stack pointer
-// x2 is used as a temporary register
-// x3 is used as a loop counter
-// x4 is used to store the array pointer
-// x5 is used to store the minimum value
-// x6 is used to store the maximum value
-// x7 is used to store the random number
-// x8 is used to store the current index
+.data
+array:
+  .skip 40          // reserve 40 bytes for an array of 10 integers
 
-// Set up the stack
-    mov x1, sp
-    sub sp, sp, #32
+format:
+  .asciz "%d\n"     // format string for printing integers
 
-// Allocate memory for the array
-    mov x2, ARRAY_SIZE
-    lsl x2, x2, #2     // Multiply by 4 (size of int)
-    bl malloc
-    mov x4, x0         // Store the array pointer
+.text
+.global main
+main:
+  // initialize random number generator
+  adr x0, .random_seed  // address of random seed
+  ldr x1, [x0]          // load random seed
+  add x1, x1, #1        // increment random seed
+  str x1, [x0]          // store updated random seed
 
-// Initialize the random number generator
-    bl srand
+  // generate and store random integers in array
+  mov x2, #10           // set loop counter
+  adr x3, array         // address of array
+  ldr x4, =10           // minimum value
+  ldr x5, =90           // range of values (max - min + 1)
+  ldr x6, .random_mask  // mask for random bits
+loop:
+  bl rand               // call rand() function
+  and x7, x0, x6        // mask off unwanted random bits
+  sdiv x7, x7, x5       // divide by range of values
+  madd x7, x7, x5, x4   // multiply by range of values and add minimum value
+  str x7, [x3], #8      // store random integer in array and increment array pointer
+  subs x2, x2, #1       // decrement loop counter
+  bne loop              // loop until counter is zero
 
-// Generate the array
-    mov x5, MIN_VALUE
-    mov x6, MAX_VALUE
-    mov x8, #0         // Initialize the index
-generate_loop:
-    cmp x8, ARRAY_SIZE
-    b.eq generate_exit
+  // print out array
+  mov x0, #1            // stdout file descriptor
+  mov x1, x3            // address of array
+  ldr x2, =10           // loop counter
+print_loop:
+  ldr x3, [x1], #8      // load integer from array and increment array pointer
+  mov w4, #0            // zero out upper 32 bits of x4
+  orr x4, x4, x3        // copy integer to lower 32 bits of x4
+  adr x5, format        // address of format string
+  bl printf             // call printf() function
+  subs x2, x2, #1       // decrement loop counter
+  bne print_loop        // loop until counter is zero
 
-    bl rand
-    sdiv x7, x0, MAX_VALUE-MIN_VALUE+1
-    madd x7, x7, MAX_VALUE-MIN_VALUE+1, x0
-    add x7, x7, MIN_VALUE
-    str x7, [x4, x8, lsl #2]  // Store the random number in the array
-    add x8, x8, #1            // Increment the index
-    b generate_loop
+  // exit program
+  mov x0, #0            // exit status code
+  ret
 
-generate_exit:
+// random seed
+.random_seed:
+  .quad 0x12345678abcdef
 
-// Clean up the stack and exit
-    add sp, sp, #32
-    mov w0, #0
-    ret
+// mask for random bits
+.random_mask:
+  .quad 0xffffffffffff
+
+// import C library functions
+.import rand, symbol=libc
+.import printf, symbol=libc
