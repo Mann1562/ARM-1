@@ -1,51 +1,48 @@
-    .section .data
-    .section .bss
-    .lcomm array, 40             // reserve 40 bytes for the array (10 integers * 4 bytes per integer)
+/* aarch64 assembly program to generate an array of 10 random integers
+   in the range [10..99] and print out the array to standard output */
 
-    .section .text
     .global main
-    .import rand
-    .import printf
-
+    .bss
+array:
+    .skip 40
+    .text
 main:
-    // Seed the random number generator with the current time
-    adr x0, current_time
+    // seed the random number generator
+    mov x0, #0
     bl srand
 
-    // Generate 10 random integers in the range [10, 99] and store them in the array
-    mov x1, #0                  // i = 0
-loop:
-    ldr x2, =array              // load address of array into x2
-    add x2, x2, x1, lsl #2      // calculate address of array[i]
-    bl rand                     // generate a random integer
-    mov x3, #90                 // maximum random value = 99 - 10 + 1 = 90
-    add x4, x0, #10             // minimum random value = 10
-    sdiv x0, x0, x3             // divide the random number by 90
-    msub x0, x0, x3, x0         // multiply by 90 and subtract from original value to get the remainder
-    add x0, x0, x4              // add 10 to get a random value in the range [10, 99]
-    str x0, [x2]                // store the random value in array[i]
-    add x1, x1, #1              // i++
-    cmp x1, #10
-    b.lt loop
+    // fill the array with random numbers
+    mov x1, #10             // array length
+    ldr x2, =array          // load array address
+    fill_loop:
+        bl rand             // generate a random number
+        umod x3, x0, #90    // get the remainder of the division by 90
+        add x3, x3, #10     // add 10 to get a number in the range [10..99]
+        str w3, [x2], #4    // store the random number in the array
+        subs x1, x1, #1
+        bne fill_loop
 
-    // Print the array
-    ldr x0, =msg
-    bl printf
+    // print the array to standard output
     ldr x0, =array
-    mov x1, #10
+    ldr x1, =10
+    ldr x2, =format_str
+    mov w8, #0
 print_loop:
-    ldr w2, [x0], #4
-    mov w1, #5                  // format specifier for printing integers with a width of 5
+    ldr w3, [x0], #4
     bl printf
-    sub x1, x1, #1
-    cbnz x1, print_loop
+    subs x1, x1, #1
+    bne print_loop
+    b exit
 
-    // Exit
+    // exit the program
+exit:
     mov x0, #0
     ret
 
-    .section .data
-msg:
-    .asciz "The random array is: "
-current_time:
-    .space 8
+    .data
+format_str:
+    .ascii "%d "
+
+    .extern printf
+    .extern srand
+    .extern rand
