@@ -36,7 +36,8 @@ generate_loop:
     b.eq generate_exit
 
     bl rand
-    umod x7, x0, MAX_VALUE-MIN_VALUE+1
+    sdiv x7, x0, MAX_VALUE-MIN_VALUE+1
+    madd x7, x7, MAX_VALUE-MIN_VALUE+1, x0
     add x7, x7, MIN_VALUE
     str x7, [x4, x8, lsl #2]  // Store the random number in the array
     add x8, x8, #1            // Increment the index
