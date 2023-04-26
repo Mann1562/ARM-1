@@ -13,77 +13,77 @@ str_newline: .asciz "\n"
 main:
     stp x29, x30, [sp, #-16]!  // Save frame pointer and link register
 
-    // Generate random array of 10 integers between 10 and 99
-    mov x1, 10
-    ldr x2, =array
+    // Fill the array with 10 random integers in the range [10..99]
+    mov x19, 10
+    ldr x20, =array
 generate_random_numbers:
     bl rand
-    and w0, w0, 0x7F  // Limit to range [0..99]
+    and w0, w0, 0x7F
     cmp w0, 99
     b.gt generate_random_numbers
     cmp w0, 10
     b.lt generate_random_numbers
-    str w0, [x2], 4  // Store random number and increment array pointer
-    subs x1, x1, 1
+    str w0, [x20], 4
+    subs x19, x19, 1
     b.ne generate_random_numbers
 
     // Print the random array
     ldr x0, =str_random_array
     bl printf
-    mov x1, 10
-    ldr x2, =array
+    mov x19, 10
+    ldr x20, =array
     
 print_random_array:
-    ldr w3, [x2], 4  // Load integer from array and increment array pointer
+    ldr w1, [x20], 4
     ldr x0, =str_int_format
     bl printf
-    subs x1, x1, 1
+    subs x19, x19, 1
     b.ne print_random_array
     ldr x0, =str_newline
     bl printf
 
-    // Perform insertion sort algorithm on the array
-    mov x1, 1
+    // Insertion sort algorithm
+    mov x19, 1
     
 start_insertion_sort:
-    cmp x1, 9
+    cmp x19, 9
     b.gt finish_insertion_sort
-    ldr x2, =array
-    add x2, x2, x1, lsl 2
-    ldr w4, [x2]  // Load key element to be inserted
-    sub x5, x1, 1
-    sub x2, x2, 4
+    ldr x20, =array
+    add x20, x20, x19, lsl 2
+    ldr w21, [x20]
+    sub x22, x19, 1
+    sub x20, x20, 4
     
 shift_elements:
-    cmp x5, 0
+    cmp x22, 0
     b.lt insert_key
-    ldr w6, [x2]
-    cmp w6, w4
+    ldr w23, [x20]
+    cmp w23, w21
     b.le insert_key
-    add x7, x2, 4
-    str w6, [x7]
-    sub x2, x2, 4
-    sub x5, x5, 1
+    add x24, x20, 4
+    str w23, [x24]
+    sub x20, x20, 4
+    sub x22, x22, 1
     b shift_elements
     
 insert_key:
-    add x7, x2, 4
-    str w4, [x7]
-    add x1, x1, 1
+    add x24, x20, 4
+    str w21, [x24]
+    add x19, x19, 1
     b start_insertion_sort
 
 finish_insertion_sort:
     // Print the sorted array
     ldr x0, =str_sorted_array
     bl printf
-    mov x1, 10
-    ldr x2, =array
+    mov x19, 10
+    ldr x20, =array
     
 print_sorted_array:
-    ldr w3, [x2], 4  // Load integer from array and increment array pointer
+    ldr w1, [x20], 4
     ldr x0, =str_int_format
     bl printf
-    subs x1, x1, 1
+    subs x19, x19, 1
     b.ne print_sorted_array
     ldr x0, =str_newline
     bl printf
