@@ -1,3 +1,18 @@
+.global main
+main:
+    // Initialize array with random values
+    mov x0, #100              // set n to 100
+    adr x1, arr               // get address of array
+    bl init_array             // call init_array function to fill array with random values
+
+    // Print array
+    mov x0, x1                // set x0 to the address of the array
+    mov x1, #100              // set n to 100
+    bl print_array            // call print_array function to print array
+
+    // Exit program
+    mov x0, #0                // set return value to 0
+    ret                       // return to operating system
 //#1
 .global init_array
 init_array:
