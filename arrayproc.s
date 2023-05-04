@@ -1,20 +1,20 @@
 
         .section .rodata
-getIdStr: .string "Enter your TCU ID number: "
+idString: .string "Enter your TCU ID number: "
         .align 3
-inputintstr: .asciz "%d"
+inputString: .asciz "%d"
         .align 3
-intstr: .asciz "\t%d"
+integerS: .asciz "\t%d"
         .align 3
 newline: .asciz "\n"
         .align 3
-outputstr1: .asciz "\nCreating 2 arrays of %d values each.\n\n"
+createString: .asciz "\nCreating 2 arrays of %d values each.\n\n"
         .align 3
-outputstr2: .asciz "The original array is:\n"
+orgArrString: .asciz "The original array is:\n"
         .align 3
-outputstr3: .asciz "The sorted duplicate array is:\n"
+dupArrString: .asciz "The sorted duplicate array is:\n"
         .align 3
-outputstr4: .asciz "The average of the duplicate array is: %d\n"
+avgString: .asciz "The average of the duplicate array is: %d\n"
         .align 3
 
 
@@ -72,7 +72,7 @@ continueMain:
 	ldr	x2, =n16
 	str	w1, [x2] // store value of n into n16
 	// (b) create the storage for the two arrays
-    ldr x0, =outputstr1
+    ldr x0, =createString
     ldr x1, =n
     ldr w1, [x1]
     bl printf
@@ -91,7 +91,7 @@ continueMain:
 	mov x20, x26 // length of array1
 	bl	init_array
     // (d) call print_array for array1
-    ldr x0, =outputstr2
+    ldr x0, =orgArrString
     bl printf
     mov	x19, x25 // base of array1
 	mov x20, x26 // length of array1
@@ -108,7 +108,7 @@ continueMain:
     mov x20, x28 // length of array2
     bl insertion_sort
 	// (g) call print_array on the sorted array
-    ldr x0, =outputstr3
+    ldr x0, =dupArrString
     bl printf
     mov	x19, x27
     mov x20, x28
@@ -120,7 +120,7 @@ continueMain:
     mov x20, x28
     bl compute_average
     mov x1, x0
-    ldr x0, =outputstr4
+    ldr x0, =avgString
     bl printf
 
 
