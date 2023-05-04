@@ -1,20 +1,20 @@
 
         .section .rodata
-idString: .string "Enter your TCU ID number: "
+inputString: .string "Enter your TCU ID number: "
         .align 3
-inputString: .asciz "%d"
+inputintstr: .asciz "%d"
         .align 3
-integerS: .asciz "\t%d"
+intstr: .asciz "\t%d"
         .align 3
 newline: .asciz "\n"
         .align 3
 createString: .asciz "\nCreating 2 arrays of %d values each.\n\n"
         .align 3
-orgArrString: .asciz "The original array is:\n"
+orgOutString: .asciz "The original array is:\n"
         .align 3
-dupArrString: .asciz "The sorted duplicate array is:\n"
+dupOutString: .asciz "The sorted duplicate array is:\n"
         .align 3
-avgString: .asciz "The average of the duplicate array is: %d\n"
+avgOutString: .asciz "The average of the duplicate array is: %d\n"
         .align 3
 
 
@@ -38,7 +38,7 @@ main:
     bl srand
 	// print and get the array size
 	// printf(getnstr)
-	ldr	x0, =getIdStr
+	ldr	x0, =inputString
 	bl	printf
 	// scanf(intstr, &n)
 	ldr	x0, =inputintstr
@@ -91,7 +91,7 @@ continueMain:
 	mov x20, x26 // length of array1
 	bl	init_array
     // (d) call print_array for array1
-    ldr x0, =orgArrString
+    ldr x0, =orgOutString
     bl printf
     mov	x19, x25 // base of array1
 	mov x20, x26 // length of array1
@@ -108,7 +108,7 @@ continueMain:
     mov x20, x28 // length of array2
     bl insertion_sort
 	// (g) call print_array on the sorted array
-    ldr x0, =dupArrString
+    ldr x0, =dupOutString
     bl printf
     mov	x19, x27
     mov x20, x28
@@ -120,7 +120,7 @@ continueMain:
     mov x20, x28
     bl compute_average
     mov x1, x0
-    ldr x0, =avgString
+    ldr x0, =avgOutString
     bl printf
 
 
