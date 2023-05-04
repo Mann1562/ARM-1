@@ -59,14 +59,14 @@ odd:
 	mov w0, #33
 	ldr x1, =n
 	str w0, [x1] 
-	b continueMain
+	b doRemainingSteps
 
 even:
 	mov w0, #42
 	ldr x1, =n
 	str w0, [x1] 
 
-continueMain:
+doRemainingSteps:
 	
 	ldr	x1, =n
 	ldr	w1, [x1] 
@@ -138,17 +138,17 @@ continueMain:
 init_array:
 	stp	x29, x30, [sp, #-16]! 
 	mov	x21, #0
-loop1:
+initloop:
 	cmp	x21, x20 
-	bge	endloop1
+	bge	initend
     bl rand
     mov w2, #256
     udiv w1, w0, w2 
     msub w0, w1, w2, w0 
 	str	w0, [x19, x21, lsl #2] 
 	add	x21, x21, #1
-	b	loop1	
-endloop1:
+	b	initloop	
+initend:
 	ldp	x29, x30, [sp], #16 
 	ret 
 
@@ -157,9 +157,9 @@ endloop1:
 print_array:
 	stp	x29, x30, [sp, #-16]! 
 	mov	x21, #0 
-loop2:
+printloop:
 	cmp	x21, x20 
-	bge	endloop2 
+	bge	printend 
     ldr x0, =intstr
     ldr w1, [x19, x21, lsl #2] 
     bl printf 
@@ -169,12 +169,12 @@ loop2:
     add	x21, x21, #1 
     cmp x0, #4 
     bge printarrafter5 
-	b	loop2	
+	b	printloop	
 printarrafter5:
     ldr x0, =newline
     bl printf
-    bl loop2
-endloop2:
+    bl printloop
+printend:
     ldr x0, =newline
     bl printf
 	ldp	x29, x30, [sp], #16
@@ -185,14 +185,14 @@ endloop2:
 copy_array:
     stp	x29, x30, [sp, #-16]! 
     mov	x22, #0 
-loop3:
+copyloop:
     cmp	x22, x21 
-    bge	endloop3 
+    bge	copyend
     ldr w1, [x20, x22, lsl #2] 
     str	w1, [x19, x22, lsl #2] 
     add	x22, x22, #1 
-    b	loop3
-endloop3:
+    b	copyloop
+copyend:
     ldp	x29, x30, [sp], #16 
     ret 
 
