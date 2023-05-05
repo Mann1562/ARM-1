@@ -1,4 +1,3 @@
-
         .section .rodata
 inputString: .string "Enter your TCU ID number: "
         .align 3
@@ -231,30 +230,30 @@ compute_average:
     mov w24, w20 
     mov w21, w20 
     mov w20, #0 
-    bl sum_array 
+    bl sumarray 
     udiv w0, w0, w24 
     ldp x29, x30, [sp], #16 
     ret 
 
 
-        .type sum_array, @function
+        .type sumarray, @function
 
-sum_array:
+sumarray:
 	stp	x29, x30, [sp, #-16]! 
     stp x22, x23, [sp, #-16]!  
 	cmp x21, x20
-    bgt startnoteqend
+    bgt startend
 starteqend:
     mov x0, #0
-    b endsumarray
-startnoteqend:
+    b endsum
+startend:
     sub w2, w21, #1 
     ldr w22, [x19, x2, lsl #2] 
     sub w21, w21, #1
-    bl sum_array
+    bl sumarray
     mov w23, w0
     add w0, w23, w22 
-endsumarray:
+endsum:
     ldp x22, x23, [sp], #16 
 	ldp	x29, x30, [sp], #16 
     ret 
